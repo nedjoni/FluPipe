@@ -208,7 +208,8 @@ def main():
 		config['read_filter_qual'] = args.phred
 		config['read_filter_len'] = args.length
 		config['cns_min_cov'] = args.cns_mincov
-		config['run_id'] = args.run_id
+		config['run_id'] = args.run_id 
+		config["parent_folder"] = os.path.dirname(os.path.abspath(__file__))  # Parent folder of the Snakefile
 
 	configfile = os.path.join(args.out, "results", "config.yaml")
 	os.makedirs(os.path.join(args.out, "results"), exist_ok=True)

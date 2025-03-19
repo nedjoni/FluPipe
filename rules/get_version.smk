@@ -1,15 +1,17 @@
 #singularity: "docker://rkibioinf/general:3.6.0--53569a8"
 # cd ${params.sd} command problematic in container
 
-rule getVersion:
+rule get_version:
     output:
         os.path.join(PROJFOLDER, "pipeline.version")
-    params:
-        sd = srcdir(".")
     log:
-        os.path.join(DATAFOLDER["logs"], "version", "git.repository.version.log")
+        os.path.join(DATAFOLDER["logs"], "version", "pipeline.version.log")
     shell:
         r"""
-            cd {params.sd};
-            git describe 1> {output} 2> {log} || echo 'unknown_version' 1> {output} 2> {log}
+            # Change to the parent directory where the Git repo is located
+            cd {config[parent_folder]}  # This refers to the parent folder defined in the config
+
+            # Try to get the Git version
+            git describe --tags > {output} 2> {log} || echo 'unknown_version' > {output} 2> {log}
         """
+
