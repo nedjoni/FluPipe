@@ -1,7 +1,7 @@
 #singularity: "docker://rkibioinf/general:3.6.0--53569a8"
 # cd ${params.sd} command problematic in container
 
-rule get_version:
+rule getVersion:
     output:
         os.path.join(PROJFOLDER, "pipeline.version")
     log:
