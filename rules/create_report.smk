@@ -13,7 +13,7 @@ rule createReport:
         report = os.path.join(PROJFOLDER, "qc_report.html")
     params:
         p_folder = PROJFOLDER,
-        l_folder = DATAFOLDER["reporting"],
+        l_folder = os.path.join(PROJFOLDER, "intermediate_data", "08_reporting"),
         run_id = REPORT_RUNID,
         min_cov = CNS_MIN_COV,
         template = srcdir("../flupipe.Rmd")
@@ -24,12 +24,27 @@ rule createReport:
     threads:
         1
     shell:
-        # maybe need to replace shell by r call
         r"""
-            # create report
-            echo "####### compiling report" >> {log}
-            VERSION=$(cat {input.version})
-            Rscript -e "rmarkdown::render('{params.template}',
-                                            params=list(proj_folder='{params.p_folder}', list_folder='{params.l_folder}', run_name='{params.run_id}', min_cov='{params.min_cov}', version='$VERSION'),
-                                            output_file=file.path('{output.report}'))" &> {log}
+        # Debugging: print PROJFOLDER and l_folder to log
+        echo "PROJFOLDER is: {params.p_folder}" >> {log}
+        echo "l_folder is: {params.l_folder}" >> {log}
+
+        # Create the report folder if it doesn't exist
+        mkdir -p {params.p_folder}
+        mkdir -p {params.l_folder}
+
+        # Log the start of report generation
+        echo "####### compiling report" >> {log}
+
+        # Read the version from the file
+        VERSION=$(cat {input.version})
+
+        # Run R script to generate the report
+        Rscript -e "rmarkdown::render('{params.template}',
+                                       params=list(proj_folder='{params.p_folder}', 
+                                                   list_folder='{params.l_folder}', 
+                                                   run_name='{params.run_id}', 
+                                                   min_cov='{params.min_cov}', 
+                                                   version='$VERSION'),
+                                       output_file='{output.report}')" &> {log}
         """
